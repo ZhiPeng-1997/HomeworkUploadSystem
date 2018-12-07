@@ -1,0 +1,35 @@
+{% load static %}
+<!doctype html>
+<html lang="ch">
+  <head>
+	<link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>详情</title>
+	<style>
+
+	</style>
+  </head>
+  <body>
+	{% if homework %}
+	<div class="jumbotron">
+		<h1 class="display-4">{{homework.hwName}}</h1>
+		<p class="lead">{{homework.hwContent}}</p>
+		<hr class="my-4">
+		<p>开始日期:{{homework.hwStart|date:'Y-m-d H:i:s'}}</p>
+		<p>结束日期:{{homework.hwEnd|date:'Y-m-d H:i:s'}}</p>
+		<a class="btn btn-primary btn-lg" target="_self" href="{% url 'upload' %}" role="button">去上传</a>
+	</div>
+	{% elif notice %}
+	<div class="jumbotron">
+		<h1 class="display-4">{{notice.noticeTitle}}</h1>
+		<hr class="my-4">
+		<p>{{notice.noticeContent}}</p>
+		<a class="btn btn-primary btn-lg" target="_self" href="{% url 'index' %}" role="button">返回</a>
+	</div>
+	{% endif %}
+  </body>
+</html>

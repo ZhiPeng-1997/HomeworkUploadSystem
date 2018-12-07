@@ -1,0 +1,192 @@
+<!doctype html>
+{% load static %}
+<html lang="ch">
+  <head>
+	<link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+    <!-- Required meta tags -->
+	<meta name="renderer" content="webkit">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <title>我</title>
+	<style>
+		html,body{
+			height:100%;
+		}
+		#func{
+			margin:0 auto;
+		}
+		.func-row{
+			width:100%;
+			height:50%;
+			
+		}
+		.func-col{
+			width:50%;
+			height:100%;
+			overflow: scroll;
+			overflow-x:hidden;
+			border-bottom:0.5px solid gray;
+		}
+		body{
+			background: url("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1538993170&di=08146d57637afe74d2b1d435210a38d1&imgtype=jpg&er=1&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01992856f8b3306ac72579483df1af.jpg");
+			background-size:no-repeat;
+		}
+		.form-group input{
+			width:100%;
+		}
+		.form-group label{
+			font-size:1.5rem;
+		}
+	</style>
+  </head>
+  <body>
+  
+	<nav class="navbar navbar-expand-lg fixed-top navbar-light border-bottom" style="background-color: #e3f2fd;">
+	                   
+				<a class="navbar-brand">作业上传系统v0.1</a>
+				<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarNav">
+					<span class="navbar-toggler-icon"></span>        
+				</button>        
+			
+		
+		<div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'index' %}"><big>首&nbsp &nbsp &nbsp &nbsp页</big></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'upload' %}"><big>上交作业</big></a>
+				</li>
+				<li class="nav-item disable">
+					<a class="nav-link" href="{% url 'talk'%}"><big>匿名讨论</big></a>
+				</li>
+				{% if isLogin %}
+				<li class="nav-item">
+					<a class="nav-link active" href="{% url 'profile' %}"><big>{{loginName}}</big></a>
+				</li>
+				{% if isAdmin %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'admin' %}"><big>管&nbsp &nbsp &nbsp &nbsp理</big></a>
+				</li>
+				{% endif %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'quit' %}"><big>退&nbsp &nbsp &nbsp &nbsp出</big></a>
+				</li>
+				{% else %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'login' %}"><big>登&nbsp &nbsp &nbsp &nbsp录</big></a>
+				</li>
+				{% endif %}
+			</ul>
+		</div>
+	</nav>
+	<div id="block"></div>
+	<div class="container-fluid  text-center' id='func">
+		<div class="container" id="pwd">
+			<!--修改密码功能区-->
+			<h2>修改密码</h2>
+			<ul class="list-group">
+				<li class="list-group-item">
+					<div class="form-group">
+						<label for="oldPassword">原始密码</label>
+						<input type="password" id="oldPassword">
+						{% csrf_token %}
+					</div>
+				</li>
+				<li class="list-group-item">
+					<div class="form-group">
+						<label for="newPassword">新密码</label>
+						<input type="password" id="newPassword">
+					</div>
+				</li>
+				<li class="list-group-item">
+					<div class="form-group">
+						<label for="newPassword-repeat">重复新密码</label>
+						<input type="password" id="newPassword-repeat">
+					</div>
+				</li>
+				<li class="list-group-item">
+					<div class="form-group">
+						<input type="button" class="btn border border-info" id="submitButton" value="提交" onclick='changePassword()'>
+					</div>
+				</li>				
+			</ul>
+		</div>
+		<script>
+			var changePassword = function(){
+				fd = new FormData()
+				if(!(
+					$("#oldPassword").val() &&
+					$("#newPassword").val() &&
+					$("#newPassword-repeat").val()
+				))
+				{
+					alert("请完整填写")
+					return
+				}
+				if(!(
+					$("#newPassword").val() == $("#newPassword-repeat").val()
+				)){
+					alert("两次输入新密码必须相同")
+					return
+				}
+				fd.append('oldPassword',$("#oldPassword").val())
+				fd.append('newPassword',$("#newPassword").val())
+				fd.append('csrfmiddlewaretoken',$('input[name=csrfmiddlewaretoken]').val())
+				$.ajax({
+					url: '/api/changePassword',
+					type: 'POST',
+					processData:false,
+					contentType: false,
+					data: fd, //获取表单数据
+					success:function(res){
+						console.log(res)
+						if(res['message'] == 0){
+							alert('提交成功！')
+							window.location = "{% url 'index' %}"
+						}
+						else{
+							alert('提交失败！，检查原始密码是否正确。')
+						}
+					},
+					error:function(){
+						alert('提交失败，请检查网络！')
+					}
+				})
+			}
+		</script>
+		<div class="container" id="homework">
+			<!--作业历史功能区-->
+			<h2>作业上交情况</h2>
+			<ul class="list-group">
+			{% for item in homeworksInfo %}
+			<li class="list-group-item">
+			<div class="container">
+				<div class="row">
+					<div class="col-md">{{item}}</div>
+					<div class="col-md">已交</div>
+				</div>
+			</div>
+			</li>
+			{% endfor %}
+			</ul>
+		</div>
+		
+	</div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/esm/popper.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.min.js"></script>
+	<script>
+		//调整功能区域父标签高度
+		(function(){
+		console.log($("nav").outerHeight());
+		$("#block").css("height",$("nav").outerHeight()+"px")
+		})();
+	</script>
+  </body>
+</html>

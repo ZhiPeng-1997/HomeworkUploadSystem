@@ -1,0 +1,302 @@
+{% load static %}
+<html lang="ch">
+  <head>
+	<link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>  
+
+    <title>管理</title>
+	<style>
+		body{
+			background: url("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1538993170&di=08146d57637afe74d2b1d435210a38d1&imgtype=jpg&er=1&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01992856f8b3306ac72579483df1af.jpg");
+			background-size:no-repeat;
+		}
+		.func-row{
+			width:100%;
+			height:50%;
+			
+		}
+		.func-col{
+			width:50%;
+			height:100%;
+			overflow: scroll;
+			overflow-x:hidden;
+			border-bottom:0.5px solid gray;
+		}
+		#notice{
+			margin-top:10px;
+		}
+		.form-group input:not(input[type=reset]){
+			width:100%;
+		}
+		.form-group label:not(.form-check-label){
+			font-size:1.5rem;
+		}
+	</style>
+  </head>
+  <body>
+	<nav class="navbar navbar-expand-lg fixed-top navbar-light border-bottom" style="background-color: #e3f2fd;">
+		<a class="navbar-brand">作业上传系统v0.1</a>
+		<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarNav">
+			<span class="navbar-toggler-icon"></span>        
+		</button>        
+		<div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'index' %}"><big>首&nbsp &nbsp &nbsp &nbsp页</big></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'upload' %}"><big>上交作业</big></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'talk'%}"><big>匿名讨论</big></a>
+				</li>
+				{% if isLogin %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'profile' %}"><big>{{loginName}}</big></a>
+				</li>
+				{% if isAdmin %}
+				<li class="nav-item">
+					<a class="nav-link  active" href="#"><big>管&nbsp &nbsp &nbsp &nbsp理</big></a>
+				</li>
+				{% endif %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'quit' %}"><big>退&nbsp &nbsp &nbsp &nbsp出</big></a>
+				</li>
+				{% else %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'login' %}"><big>登&nbsp &nbsp &nbsp &nbsp录</big></a>
+				</li>
+				{% endif %}
+			</ul>
+		</div>
+	</nav>
+	<div id="block"></div>
+	<div class="container-fluid  text-center' id='func">
+		<div class="container" id="notice">
+			<!--公告功能区-->
+			<h2>添加公告</h2>
+			<form id="announce">
+				<ul class="list-group">
+					<li class="list-group-item">
+						<div class="form-group">
+							<label for="announceTitle">标题</label>
+							<input class="form-control" id="noticeTitle" type="text">
+						</div>
+					</li>
+					<li class="list-group-item">
+						<div class="form-group">
+						<label for="announceContent">内容</label>
+							<textarea class="form-control" id="noticeContent" rows="4" placeholder="不超过180字"></textarea>
+						</div>
+					</li>
+					<li class="list-group-item text-right">
+					<button type="button" class="btn border border-info" onclick="noticeAdd()">提交</button>
+					<input type="reset" value="重置" class="btn border border-info">
+					</li>
+				</ul>
+			</form>
+		</div>
+		
+		<div class="container" id="homework">
+			<!--作业功能区-->
+			<h2>添加作业</h2>
+			<form id="addHomework">
+				{% csrf_token %}
+				<ul class="list-group">
+					<li class="list-group-item">
+						<div class="form-group">
+							<label for="hwName">标题</label>
+							<input class="form-control" id="hwName" type="text">
+						</div>
+					</li>
+					<li class="list-group-item">
+						<div class="form-group">
+						<label for="hwContent">内容</label>
+							<textarea class="form-control" id="hwContent" rows="4" placeholder="不超过180字"></textarea>
+						</div>
+					</li>
+					<li class="list-group-item">
+						<div class="form-row">
+						<label for="endYear">结束日期</label>
+							<input class="form-control time" id="endYear" type="text" placeholder="年">
+							<input class="form-control time" id="endMonth" type="text" placeholder="月">
+							<input class="form-control time" id="endDay" type="text" placeholder="日">
+							<input class="form-control time" id="endHour" type="text" placeholder="时">
+						</div>
+					</li>
+					<li class="list-group-item text-right">
+					<button type="button" class="btn border border-info" onclick="homeworkAdd()">提交</button>
+					<input type="reset" value="重置" class="btn border border-info">
+					</li>
+				</ul>
+			</form>
+		</div>
+		
+
+		
+		<!--开始定义jquery模板-->
+		<script id="input-row col-name" type="text/x-jquery-tmpl">
+			<input type="text" class="form-control statistics-content-item" placeholder="列名">
+		</script>
+		<!--定义结束-->
+		
+		<div class="container" id="homework-info">
+			<!--作业信息-->
+			<h2>查看/删除作业</h2>
+			<ul class="list-group">
+			{% if homeworks %}
+			{% for item in homeworks %}
+				<li class="list-group-item">
+				<div class="container">
+					<div class="row">
+						<div class="col-md">{{item.hwName}}</div>
+						<div class="col-md">{{item.hwStart|date:'Y-m-d H:i:s'}}&nbsp发布</div>
+						<div class="col-md">{{item.hwEnd|date:'Y-m-d H:i:s'}}&nbsp截止</div>
+						<div class="col-md"><a href="/homework/{{item.hwID}}">查看</a></div>
+						<div class="col-md"><a href="javascript:downloadFile('{{item.hwID}}','/api/uploadInfo')">查看作业情况</a></div>
+						<div class="col-md"><a href="javascript:downloadFile('{{item.hwID}}','/api/zipFiles')">打包下载</a></div>
+						<div class="col-md"><a href="javascript:homeworkDelete('/api/deleteHomework/{{item.hwID}}')">删除</a></div>
+					</div>
+				</div>
+				</li>
+			{% endfor %}
+			{% else %}
+			<li class="list-group-item">
+				暂无
+			</li>
+			{% endif %}
+			</ul>
+		</div>
+
+		<div class="container" id="statistics"><!--statistics  => 统计！-->
+			<!--统计信息添加-->
+			<h2>发布统计</h2>
+			<ul class="list-group">
+				<li class="list-group-item" >
+					<div class="form-group">
+						<label for="statistics-title">标题</label>
+						<input type="text" class="form-control" id="statistics-title">
+					</div>
+				</li>
+				
+				<li class="list-group-item form-group">
+					<div class="form-group" id="statistics-content">
+						<label for=".statistics-content-item">统计内容</label>
+						<input type="text" class="form-control statistics-content-item" placeholder="列名">
+					</div>
+					<button class="btn border border-info" onclick="addCol()">增加一列</button>
+					<button class="btn border border-info" onclick="delCol()" style="margin-left:1rem;">删除一列</button>
+					<p>提交时自动忽略留空</p>
+				</li>
+				
+				<li class="list-group-item form-group" id="statistics-time">
+					<div class="form-group">
+						<label for="endYear">结束日期</label>
+						<input class="form-control time" id="endYear" type="text" placeholder="年">
+						<input class="form-control time" id="endMonth" type="text" placeholder="月">
+						<input class="form-control time" id="endDay" type="text" placeholder="日">
+						<input class="form-control time" id="endHour" type="text" placeholder="时">
+					</div>
+				</li>
+				
+				<li class="list-group-item form-group" >
+					<div class="form-group" id="statistics-switch-container">
+						<div class="form-check" >
+							<input class="form-check-input" type="checkbox" id="statistics-switch" value="1" onchange="switchChange">
+							<label class="form-check-label" for="statistics-switch">不公开</label>
+						</div>
+					</div>
+				</li>
+				
+				<li class="list-group-item form-group" >
+					<button class="btn border border-info" onclick="statisticAdd()">提交</button>
+				</li>
+			</ul>
+			
+		</div>
+		<div class="container" id="statistics-info">
+			<!--作业信息-->
+			<h2>下载统计</h2>
+			<ul class="list-group">
+			{% if statistics %}
+			{% for item in statistics %}
+				<li class="list-group-item">
+				<div class="container">
+					<div class="row">
+						<div class="col-md">{{item.title}}</div>
+						<div class="col-md">{{item.end|date:'Y-m-d H:i:s'}}&nbsp截止</div>
+						<div class="col-md"><a href="/api/downloadFile/{{item.id}}.tsv">下载统计表</a></div>
+					</div>
+				</div>
+				</li>
+			{% endfor %}
+			{% else %}
+			<li class="list-group-item">
+				暂无
+			</li>
+			{% endif %}
+			</ul>
+		</div>
+	</div>
+	
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/esm/popper.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.min.js"></script>
+	<script src="{% static 'js/file_upload.js' %}" type="text/javascript"></script>
+	<script src="{% static 'js/admin.js' %}" type="text/javascript"></script>
+	<script>
+		/*(function(){
+		console.log($(window).height());
+		$("#login").css("height",parseInt($(window).height())*0.93 + "px")
+		})();*/
+		(function(){
+		console.log($("nav").outerHeight());
+		$("#block").css("height",$("nav").outerHeight()+"px")
+		})();
+		
+		$("#statistics-switch").on(
+			'click',
+			function(e){
+				switchChange()
+			}
+		)
+		var addCol = function(){
+			allow = true
+			$(".statistics-content-item").each(
+				 //之前的列是否已填
+				(index,item)=>{
+					if(!$(item).val()){
+						allow = false
+					}
+				}
+			)
+			if(!allow){
+				alert("请先将之前的填完整")
+				return
+			}
+			$("#statistics-content").append('<input type="text" class="form-control statistics-content-item" placeholder="列名">')
+		}
+		var delCol = () => {
+			$("#statistics-content").children("input:last-child").eq(-1).remove();
+		}
+		
+		var switchChange = function(){
+			switch_ = $("#statistics-switch")
+			if(switch_.prop("checked")){
+				$("#statistics-switch-container").append(
+				'<input class="form-control" id="allowList" type="text"><p>请输入允许名单，以英文分号";"隔开</p>'
+				)
+			}
+			else{
+				$("#statistics-switch-container input:not(#statistics-switch)").remove()
+				$("#statistics-switch-container p").remove()
+			}
+		}
+	</script>
+  </body>
+</html>

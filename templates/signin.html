@@ -1,0 +1,172 @@
+{% load static %}
+<!doctype html>
+<html lang="ch">
+  <head>
+	<link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>  
+    <title>登录</title>
+	<style>
+		.form-group input{
+			margin:0 auto;
+			width:70%;
+			height:13%;
+		}
+		body{
+			background: url("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1538993170&di=08146d57637afe74d2b1d435210a38d1&imgtype=jpg&er=1&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01992856f8b3306ac72579483df1af.jpg");
+			background-size:no-repeat;
+		}
+		.form-group input{
+			width:100%;
+		}
+		.form-group label{
+			font-size:1.5rem;
+		}
+	</style>
+  </head>
+  <body>
+
+		<nav class="navbar navbar-expand-lg fixed-top navbar-light border-bottom" style="background-color: #e3f2fd;">
+		     
+				<a class="navbar-brand">作业上传系统v0.1</a>
+				<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarNav">
+					<span class="navbar-toggler-icon"></span>        
+				</button>        
+		<div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'index' %}"><big>首&nbsp &nbsp &nbsp &nbsp页</big></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'upload' %}"><big>上交作业</big></a>
+				</li>
+				<li class="nav-item ">
+					<a class="nav-link disable" href="{% url 'talk'%}"><big>匿名讨论</big></a>
+				</li>
+				{% if isLogin %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'profile' %}"><big>{{loginName}}</big></a>
+				</li>
+				{% if isAdmin %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'admin' %}"><big>管&nbsp &nbsp &nbsp &nbsp理</big></a>
+				</li>
+				{% endif %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'quit' %}"><big>退&nbsp &nbsp &nbsp &nbsp出</big></a>
+				</li>
+				{% else %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'login' %}"><big>登&nbsp &nbsp &nbsp &nbsp录</big></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link active" href="{% url 'signIn' %}"><big>注&nbsp &nbsp &nbsp &nbsp册</big></a>
+				</li>
+				{% endif %}
+			</ul>
+		</div>
+	</nav>
+	<div id="block"></div>
+	<div class="container-fluid rounded" id="signin">
+			<div id="login-form" class="container">
+				<h2>注册</h2>
+				<form action="" method="POST">
+					<ul class="list-group">
+						{% csrf_token %}
+						<li class="list-group-item">
+							<div class="form-group">
+								<label for="account"><h4>账号:</h4></label>
+								<input type="text" id="account" name="account" placeholder="1605071801XX">
+							</div>
+						</li>
+						<li class="list-group-item">
+							<div class="form-group">
+								<label for="password"><h4>密码:</h4></label>
+								<input type="password" name="password" id="password">
+							</div>
+						</li>
+						<li class="list-group-item">
+							<div class="form-group">
+								<label for="name"><h4>姓名:</h4></label>
+								<input type="text" name="name" id="name">
+							</div>
+						</li>
+						<li class="list-group-item">
+							<div class="form-group">
+								<label for="phone"><h4>手机(仅验证用):</h4></label>
+								<input type="text" name="phone" id="phone">
+							</div>
+						</li>
+						<li class="list-group-item">
+							<div class="form-group">
+								<label for="submit"><h4>&nbsp &nbsp &nbsp &nbsp &nbsp</h4></label>
+								<input type="button" class="btn border border-info" value="注册" onclick="signin()">
+							</div>
+						</li>
+					</ul>
+				</form>
+			</div>
+	</div>
+	<script>
+			var signin = function(){
+				fd = new FormData()
+				if(!(
+					$("#password").val() &&
+					$("#account").val() &&
+					$("#phone").val()
+				))
+				{
+					alert("请完整填写")
+					return
+				}
+				fd.append('password',$("#password").val())
+				fd.append('account',$("#account").val())
+				fd.append('phone',$("#phone").val())
+				fd.append('name',$("#name").val())
+				fd.append('csrfmiddlewaretoken',$('input[name=csrfmiddlewaretoken]').val())
+				$.ajax({
+					url: "{% url 'signIn' %}",
+					type: 'POST',
+					processData:false,
+					contentType: false,
+					data: fd, //获取表单数据
+					success:function(res){
+						console.log(res)
+						if(res['message'] == 0){
+							alert('提交成功！')
+							window.location = "{% url 'index' %}"
+						}
+						else if(res['message'] == -1){
+							alert('提交失败！不在允许名单。')
+						}
+						else if(res['message'] == -2){
+							alert('注册失败！已注册。')
+						}
+						else{
+							alert('提交失败！')
+						}
+					},
+					error:function(){
+						alert('提交失败，请检查网络！')
+					}
+				})
+			}
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/esm/popper.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.min.js"></script>
+	<script>
+		/*(function(){
+		console.log($(window).height());
+		$("#login").css("height",parseInt($(window).height())*0.93 + "px")
+		})();*/
+		(function(){
+		console.log($("nav").outerHeight());
+		$("#block").css("height",$("nav").outerHeight()+"px")
+		})();
+	</script>
+  </body>
+</html>
